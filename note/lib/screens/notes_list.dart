@@ -8,7 +8,6 @@ class NotesListScreen extends StatefulWidget {
 }
 
 class _NotesListScreenState extends State<NotesListScreen> {
-  // Временные данные для вёрстки
   final List<Map<String, dynamic>> _mockNotes = [
     {
       'title': 'Купить продукты',
@@ -40,7 +39,6 @@ class _NotesListScreenState extends State<NotesListScreen> {
           IconButton(
             icon: const Icon(Icons.currency_exchange),
             onPressed: () {
-              // Позже добавим навигацию
             },
           ),
         ],
@@ -124,7 +122,6 @@ class _NotesListScreenState extends State<NotesListScreen> {
                 onPressed: () {},
               ),
               onTap: () {
-                // Позже добавим редактирование
               },
             ),
           );

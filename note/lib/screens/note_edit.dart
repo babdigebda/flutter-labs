@@ -8,7 +8,6 @@ class NoteEditScreen extends StatefulWidget {
 }
 
 class _NoteEditScreenState extends State<NoteEditScreen> {
-  // Контроллеры для полей ввода
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
@@ -28,7 +27,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: () {
-              // Позже добавим сохранение
               Navigator.pop(context);
             },
           ),
@@ -39,7 +37,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Поле для заголовка
             const Text(
               'Заголовок',
               style: TextStyle(
@@ -63,8 +60,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             ),
             
             const SizedBox(height: 20),
-            
-            // Поле для содержимого
+
             const Text(
               'Содержание',
               style: TextStyle(
@@ -90,7 +86,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             
             const SizedBox(height: 30),
             
-            // Секция с валютой
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -111,7 +106,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Выбор валюты
                   const Text(
                     'Валюта',
                     style: TextStyle(
@@ -161,7 +155,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   
                   const SizedBox(height: 12),
                   
-                  // Поле для суммы
                   const Text(
                     'Сумма',
                     style: TextStyle(

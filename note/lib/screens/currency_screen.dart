@@ -10,7 +10,7 @@ class CurrencyScreen extends StatefulWidget {
 class _CurrencyScreenState extends State<CurrencyScreen> {
   String _selectedBase = 'EUR';
   
-  // Моковые данные для вёрстки
+
   final List<Map<String, dynamic>> _mockRates = [
     {'code': 'USD', 'name': 'Доллар США', 'rate': 1.05, 'flag': '🇺🇸'},
     {'code': 'GBP', 'name': 'Фунт стерлингов', 'rate': 0.85, 'flag': '🇬🇧'},
@@ -38,7 +38,6 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
       ),
       body: Column(
         children: [
-          // Панель выбора базовой валюты
           Container(
             color: Colors.teal.shade50,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -85,7 +84,6 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
             ),
           ),
           
-          // Заглушка "Обновлено"
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             alignment: Alignment.centerRight,
@@ -99,7 +97,6 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
             ),
           ),
           
-          // Список валют
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(12),
