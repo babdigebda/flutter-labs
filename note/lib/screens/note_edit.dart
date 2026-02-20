@@ -19,6 +19,42 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   ];
 
   @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  // Создание заметки и возврат на предыдущий экран
+  void _createNote() {
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Введите заголовок заметки'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Создаём объект заметки
+    final newNote = {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'title': _titleController.text,
+      'content': _contentController.text,
+      'date': DateTime.now(),
+      'currency': _selectedCurrency,
+      'amount': _amountController.text.isNotEmpty
+          ? double.tryParse(_amountController.text.replaceAll(',', '.'))
+          : null,
+    };
+
+    // Возвращаем результат на предыдущий экран
+    Navigator.pop(context, newNote);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -26,9 +62,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: _createNote, // Сохраняем и возвращаем
           ),
         ],
       ),
@@ -37,6 +71,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Поле для заголовка
             const Text(
               'Заголовок',
               style: TextStyle(
@@ -57,10 +92,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 fillColor: Colors.grey.shade50,
               ),
               autofocus: true,
+              textInputAction: TextInputAction.next,
             ),
             
             const SizedBox(height: 20),
-
+            
+            // Поле для содержимого
             const Text(
               'Содержание',
               style: TextStyle(
@@ -80,12 +117,13 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 filled: true,
                 fillColor: Colors.grey.shade50,
               ),
-              maxLines: 8,
-              minLines: 5,
+              maxLines: 5,
+              minLines: 3,
             ),
             
             const SizedBox(height: 30),
             
+            // Секция с валютой
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -106,6 +144,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   
+                  // Выбор валюты
                   const Text(
                     'Валюта',
                     style: TextStyle(
@@ -155,6 +194,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   
                   const SizedBox(height: 12),
                   
+                  // Поле для суммы
                   const Text(
                     'Сумма',
                     style: TextStyle(

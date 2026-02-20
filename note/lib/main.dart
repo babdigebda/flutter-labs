@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/notes_list.dart';
-
+import 'screens/currency_screen.dart';
 void main() {
   runApp(const MyApp());
 }
