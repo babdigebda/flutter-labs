@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/note.dart';
 
 class NoteEditScreen extends StatefulWidget {
   const NoteEditScreen({super.key});
@@ -26,7 +27,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     super.dispose();
   }
 
-
   void _createNote() {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -38,20 +38,28 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       return;
     }
 
-
-    final newNote = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'title': _titleController.text,
-      'content': _contentController.text,
-      'date': DateTime.now(),
-      'currency': _selectedCurrency,
-      'amount': _amountController.text.isNotEmpty
+    final newNote = Note(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: _titleController.text,
+      content: _contentController.text,
+      createdAt: DateTime.now(),
+      lastModified: DateTime.now(),
+      currencyCode: _selectedCurrency,
+      currencyAmount: _amountController.text.isNotEmpty
           ? double.tryParse(_amountController.text.replaceAll(',', '.'))
           : null,
-    };
-
+    );
 
     Navigator.pop(context, newNote);
+  }
+
+  String _getFlagForCurrency(String currency) {
+    const flags = {
+      'USD': '🇺🇸', 'EUR': '🇪🇺', 'GBP': '🇬🇧', 'JPY': '🇯🇵',
+      'CHF': '🇨🇭', 'CAD': '🇨🇦', 'AUD': '🇦🇺', 'CNY': '🇨🇳',
+      'RUB': '🇷🇺',
+    };
+    return flags[currency] ?? '🏳️';
   }
 
   @override
@@ -62,7 +70,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: _createNote, 
+            onPressed: _createNote,
           ),
         ],
       ),
@@ -71,7 +79,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
             const Text(
               'Заголовок',
               style: TextStyle(
@@ -92,11 +99,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 fillColor: Colors.grey.shade50,
               ),
               autofocus: true,
-              textInputAction: TextInputAction.next,
             ),
             
             const SizedBox(height: 20),
-            
             
             const Text(
               'Содержание',
@@ -123,7 +128,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             
             const SizedBox(height: 30),
             
-            
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -143,7 +147,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
                   
                   const Text(
                     'Валюта',
@@ -194,7 +197,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   
                   const SizedBox(height: 12),
                   
-                  
                   const Text(
                     'Сумма',
                     style: TextStyle(
@@ -227,14 +229,5 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         ),
       ),
     );
-  }
-
-  String _getFlagForCurrency(String currency) {
-    const flags = {
-      'USD': '🇺🇸', 'EUR': '🇪🇺', 'GBP': '🇬🇧', 'JPY': '🇯🇵',
-      'CHF': '🇨🇭', 'CAD': '🇨🇦', 'AUD': '🇦🇺', 'CNY': '🇨🇳',
-      'RUB': '🇷🇺',
-    };
-    return flags[currency] ?? '🏳️';
   }
 }

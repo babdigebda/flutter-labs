@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/fixer_service.dart';
+import '../models/currency_rate.dart';
+import 'package:intl/intl.dart';  
 
 class CurrencyScreen extends StatefulWidget {
   const CurrencyScreen({super.key});
@@ -8,19 +11,58 @@ class CurrencyScreen extends StatefulWidget {
 }
 
 class _CurrencyScreenState extends State<CurrencyScreen> {
-  String _selectedBase = 'EUR';
-  
+  List<CurrencyRate> _rates = [];
+  bool _isLoading = true;
+  String? _error;
+  DateTime? _lastUpdated;  
 
-  final List<Map<String, dynamic>> _mockRates = [
-    {'code': 'USD', 'name': 'Доллар США', 'rate': 1.05, 'flag': '🇺🇸'},
-    {'code': 'GBP', 'name': 'Фунт стерлингов', 'rate': 0.85, 'flag': '🇬🇧'},
-    {'code': 'JPY', 'name': 'Японская иена', 'rate': 160.50, 'flag': '🇯🇵'},
-    {'code': 'CHF', 'name': 'Швейцарский франк', 'rate': 0.98, 'flag': '🇨🇭'},
-    {'code': 'CAD', 'name': 'Канадский доллар', 'rate': 1.42, 'flag': '🇨🇦'},
-    {'code': 'AUD', 'name': 'Австралийский доллар', 'rate': 1.58, 'flag': '🇦🇺'},
-    {'code': 'CNY', 'name': 'Китайский юань', 'rate': 7.65, 'flag': '🇨🇳'},
-    {'code': 'RUB', 'name': 'Российский рубль', 'rate': 95.50, 'flag': '🇷🇺'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadRates();
+  }
+
+  Future<void> _loadRates() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final rates = await FixerService.getLatestRates();
+      setState(() {
+        _rates = rates;
+        _isLoading = false;
+        _lastUpdated = DateTime.now();  
+      });
+      
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Курсы обновлены: ${DateFormat.Hm().format(DateTime.now())}'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка обновления: $e'),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('HH:mm, d MMMM').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,128 +72,154 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {},
-          ),
+
+          _isLoading
+              ? Container(
+                  margin: const EdgeInsets.all(8),
+                  child: const CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _loadRates,
+                  tooltip: 'Обновить курсы',
+                ),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.teal.shade50,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                const Text(
-                  'Базовая валюта:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
+      body: _isLoading && _rates.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null && _rates.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _error!,
+                        style: const TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadRates,
+                        child: const Text('Повторить'),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedBase,
-                        isExpanded: true,
-                        items: const [
-                          DropdownMenuItem(value: 'EUR', child: Text('EUR (Евро)')),
-                          DropdownMenuItem(value: 'USD', child: Text('USD (Доллар США)')),
-                          DropdownMenuItem(value: 'GBP', child: Text('GBP (Фунт)')),
-                          DropdownMenuItem(value: 'JPY', child: Text('JPY (Иена)')),
+                )
+              : Column(
+                  children: [
+
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      color: Colors.teal.shade50,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                'Базовая валюта:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.teal,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Text(
+                                  'EUR (Евро)',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_lastUpdated != null)
+                            Text(
+                              'Обновлено: ${_formatDate(_lastUpdated!)}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade700,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
                         ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedBase = value;
-                            });
-                          }
+                      ),
+                    ),
+                    
+
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(12),
+                        itemCount: _rates.length,
+                        itemBuilder: (ctx, index) {
+                          final rate = _rates[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              leading: Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.shade50,
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    rate.flag,
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                rate.code,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              subtitle: Text(rate.name),
+                              trailing: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.shade100,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  rate.rate.toStringAsFixed(4),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.teal.shade900,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
                         },
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            alignment: Alignment.centerRight,
-            child: Text(
-              'Обновлено: 14:30, 19 марта',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-          
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: _mockRates.length,
-              itemBuilder: (ctx, index) {
-                final rate = _mockRates[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    leading: Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        color: Colors.teal.shade50,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Center(
-                        child: Text(
-                          rate['flag'],
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      rate['code'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    subtitle: Text(rate['name']),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.teal.shade100,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        rate['rate'].toStringAsFixed(4),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.teal.shade900,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

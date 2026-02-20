@@ -1,43 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import '../models/note.dart';
 import 'note_edit.dart';
 import 'currency_screen.dart';
 
 class NotesListScreen extends StatefulWidget {
-  const NotesListScreen({super.key});
+  final List<Note> initialNotes;
+  
+  const NotesListScreen({super.key, required this.initialNotes});
 
   @override
   State<NotesListScreen> createState() => _NotesListScreenState();
 }
 
 class _NotesListScreenState extends State<NotesListScreen> {
+  late List<Note> _notes;
 
-  List<Map<String, dynamic>> _notes = [
-    {
-      'id': '1',
-      'title': 'Купить продукты',
-      'content': 'Молоко, яйца, хлеб, сыр, овощи',
-      'date': DateTime.now().subtract(const Duration(hours: 2)),
-    },
-    {
-      'id': '2',
-      'title': 'Встреча с командой',
-      'content': 'Обсудить новый проект в 15:00',
-      'date': DateTime.now().subtract(const Duration(days: 1)),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _notes = widget.initialNotes;
+  }
 
-  
-  void _addNote(Map<String, dynamic> newNote) {
+
+  Future<void> _saveNotes() async {
+    final prefs = await SharedPreferences.getInstance();
+    final notesJson = _notes.map((note) => jsonEncode(note.toJson())).toList();
+    await prefs.setStringList('notes', notesJson);
+  }
+
+  void _addNote(Note newNote) {
     setState(() {
       _notes.add(newNote);
     });
+    _saveNotes();
   }
 
-  
   void _deleteNote(String id) {
-    setState(() {
-      _notes.removeWhere((note) => note['id'] == id);
-    });
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Удалить заметку'),
+        content: const Text('Вы уверены?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _notes.removeWhere((note) => note.id == id);
+              });
+              _saveNotes();
+              Navigator.pop(ctx);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Удалить'),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatDate(DateTime date) {
@@ -59,20 +83,10 @@ class _NotesListScreenState extends State<NotesListScreen> {
       appBar: AppBar(
         title: const Text('Мои заметки'),
         centerTitle: true,
-      
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.currency_exchange),
             onPressed: () {
-              
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -82,75 +96,6 @@ class _NotesListScreenState extends State<NotesListScreen> {
             },
           ),
         ],
-      ),
-      
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.teal,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'CurrencyNotes',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Ваши заметки и курсы валют',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.note_alt),
-              title: const Text('Все заметки'),
-              onTap: () {
-                Navigator.pop(context); 
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.currency_exchange),
-              title: const Text('Курсы валют'),
-              onTap: () {
-                Navigator.pop(context); 
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CurrencyScreen(),
-                  ),
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('О приложении'),
-              onTap: () {
-                Navigator.pop(context);
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'CurrencyNotes',
-                  applicationVersion: '1.0.0',
-                  applicationLegalese: '© 2026',
-                );
-              },
-            ),
-          ],
-        ),
       ),
       body: _notes.isEmpty
           ? Center(
@@ -173,15 +118,12 @@ class _NotesListScreenState extends State<NotesListScreen> {
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () async {
-                      
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const NoteEditScreen(),
                         ),
                       );
-                      
-                      
                       if (result != null) {
                         _addNote(result);
                       }
@@ -205,7 +147,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     title: Text(
-                      note['title'],
+                      note.title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -216,7 +158,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                       children: [
                         const SizedBox(height: 4),
                         Text(
-                          note['content'],
+                          note.content,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -234,38 +176,53 @@ class _NotesListScreenState extends State<NotesListScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              _formatDate(note['date']),
+                              _formatDate(note.lastModified),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade500,
                               ),
                             ),
+                            if (note.currencyCode != null) ...[
+                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.shade50,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '${note.currencyCode} ${note.currencyAmount?.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.teal.shade800,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () => _deleteNote(note['id']),
+                      onPressed: () => _deleteNote(note.id),
                     ),
-                    onTap: () {
-                      
-                    },
                   ),
                 );
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const NoteEditScreen(),
             ),
           );
-          
-          
           if (result != null) {
             _addNote(result);
           }
