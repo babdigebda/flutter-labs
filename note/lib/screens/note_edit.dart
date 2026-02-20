@@ -26,7 +26,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     super.dispose();
   }
 
-  // Создание заметки и возврат на предыдущий экран
+
   void _createNote() {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -38,7 +38,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       return;
     }
 
-    // Создаём объект заметки
+
     final newNote = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'title': _titleController.text,
@@ -50,7 +50,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           : null,
     };
 
-    // Возвращаем результат на предыдущий экран
+
     Navigator.pop(context, newNote);
   }
 
@@ -62,7 +62,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: _createNote, // Сохраняем и возвращаем
+            onPressed: _createNote, 
           ),
         ],
       ),
@@ -71,7 +71,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Поле для заголовка
+            
             const Text(
               'Заголовок',
               style: TextStyle(
@@ -97,7 +97,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             
             const SizedBox(height: 20),
             
-            // Поле для содержимого
+            
             const Text(
               'Содержание',
               style: TextStyle(
@@ -123,7 +123,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             
             const SizedBox(height: 30),
             
-            // Секция с валютой
+            
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -144,7 +144,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Выбор валюты
+                  
                   const Text(
                     'Валюта',
                     style: TextStyle(
@@ -194,7 +194,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   
                   const SizedBox(height: 12),
                   
-                  // Поле для суммы
+                  
                   const Text(
                     'Сумма',
                     style: TextStyle(

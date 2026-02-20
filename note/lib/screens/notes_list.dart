@@ -10,7 +10,7 @@ class NotesListScreen extends StatefulWidget {
 }
 
 class _NotesListScreenState extends State<NotesListScreen> {
-  // Список заметок (будет пополняться)
+
   List<Map<String, dynamic>> _notes = [
     {
       'id': '1',
@@ -26,14 +26,14 @@ class _NotesListScreenState extends State<NotesListScreen> {
     },
   ];
 
-  // Добавление новой заметки
+  
   void _addNote(Map<String, dynamic> newNote) {
     setState(() {
       _notes.add(newNote);
     });
   }
 
-  // Удаление заметки
+  
   void _deleteNote(String id) {
     setState(() {
       _notes.removeWhere((note) => note['id'] == id);
@@ -59,7 +59,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
       appBar: AppBar(
         title: const Text('Мои заметки'),
         centerTitle: true,
-        // Кнопка для открытия Drawer
+      
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -72,7 +72,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
           IconButton(
             icon: const Icon(Icons.currency_exchange),
             onPressed: () {
-              // Навигация через push
+              
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -83,7 +83,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
           ),
         ],
       ),
-      // Drawer (боковое меню)
+      
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -118,15 +118,15 @@ class _NotesListScreenState extends State<NotesListScreen> {
               leading: const Icon(Icons.note_alt),
               title: const Text('Все заметки'),
               onTap: () {
-                Navigator.pop(context); // Закрываем Drawer
+                Navigator.pop(context); 
               },
             ),
             ListTile(
               leading: const Icon(Icons.currency_exchange),
               title: const Text('Курсы валют'),
               onTap: () {
-                Navigator.pop(context); // Закрываем Drawer
-                // Открываем экран валют
+                Navigator.pop(context); 
+                
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -173,7 +173,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () async {
-                      // Открываем экран создания и ждём результат
+                      
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -181,7 +181,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                         ),
                       );
                       
-                      // Если вернули заметку - добавляем
+                      
                       if (result != null) {
                         _addNote(result);
                       }
@@ -249,7 +249,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                       onPressed: () => _deleteNote(note['id']),
                     ),
                     onTap: () {
-                      // Здесь можно будет добавить просмотр заметки
+                      
                     },
                   ),
                 );
@@ -257,7 +257,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          // Открываем экран создания и ждём результат
+          
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
@@ -265,7 +265,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
             ),
           );
           
-          // Если вернули заметку - добавляем
+          
           if (result != null) {
             _addNote(result);
           }
