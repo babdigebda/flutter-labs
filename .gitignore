@@ -1,7 +1,0 @@
-*.apk
-*.dll
-*.pdb
-*.exe
-**/build/
-**/ephemeral/
-**/.dart_tool/
